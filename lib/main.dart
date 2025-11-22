@@ -10,46 +10,34 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Keyboard Typing',
+      title: 'Typing Speed Test',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const TypingHomePage(),
+      home: const TypingTestPage(),
     );
   }
 }
 
-class TypingHomePage extends StatefulWidget {
-  const TypingHomePage({super.key});
+class TypingTestPage extends StatefulWidget {
+  const TypingTestPage({super.key});
 
   @override
-  State<TypingHomePage> createState() => _TypingHomePageState();
+  State<TypingTestPage> createState() => _TypingTestPageState();
 }
 
-class _TypingHomePageState extends State<TypingHomePage> {
+class _TypingTestPageState extends State<TypingTestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Typing Speed Test'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Keyboard Typing'),
       ),
       body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Welcome to Keyboard Typing!',
-              style: TextStyle(fontSize: 24),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Start your typing practice',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
-        ),
+        child: Text('Typing test will go here'),
       ),
     );
   }
