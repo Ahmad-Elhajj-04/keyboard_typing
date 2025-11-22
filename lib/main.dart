@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -32,6 +33,10 @@ class _TypingTestPageState extends State<TypingTestPage> {
   final TextEditingController _textController = TextEditingController();
   final String _targetText = "The quick brown fox jumps over the lazy dog";
   String _typedText = "";
+  int _startTime = 0;
+  int _elapsedTime = 0;
+  bool _isTyping = false;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -43,13 +48,38 @@ class _TypingTestPageState extends State<TypingTestPage> {
   void dispose() {
     _textController.removeListener(_onTextChanged);
     _textController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
   void _onTextChanged() {
+    if (!_isTyping && _textController.text.isNotEmpty) {
+      _startTest();
+    }
     setState(() {
       _typedText = _textController.text;
     });
+  }
+
+  void _startTest() {
+    setState(() {
+      _isTyping = true;
+      _startTime = DateTime.now().millisecondsSinceEpoch;
+      _elapsedTime = 0;
+    });
+
+    _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      setState(() {
+        _elapsedTime = DateTime.now().millisecondsSinceEpoch - _startTime;
+      });
+    });
+  }
+
+  String _formatTime(int milliseconds) {
+    int seconds = (milliseconds / 1000).floor();
+    int minutes = seconds ~/ 60;
+    seconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   @override
