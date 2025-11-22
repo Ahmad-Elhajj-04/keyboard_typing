@@ -37,6 +37,9 @@ class _TypingTestPageState extends State<TypingTestPage> {
   int _elapsedTime = 0;
   bool _isTyping = false;
   Timer? _timer;
+  int _correctChars = 0;
+  int _totalChars = 0;
+  int _errors = 0;
 
   @override
   void initState() {
@@ -58,7 +61,31 @@ class _TypingTestPageState extends State<TypingTestPage> {
     }
     setState(() {
       _typedText = _textController.text;
+      _calculateAccuracy();
     });
+  }
+
+  void _calculateAccuracy() {
+    _totalChars = _typedText.length;
+    _correctChars = 0;
+    _errors = 0;
+
+    for (int i = 0; i < _typedText.length; i++) {
+      if (i < _targetText.length) {
+        if (_typedText[i] == _targetText[i]) {
+          _correctChars++;
+        } else {
+          _errors++;
+        }
+      } else {
+        _errors++;
+      }
+    }
+  }
+
+  double get _accuracy {
+    if (_totalChars == 0) return 100.0;
+    return (_correctChars / _totalChars) * 100;
   }
 
   void _startTest() {
