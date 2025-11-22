@@ -36,6 +36,7 @@ class _TypingTestPageState extends State<TypingTestPage> {
   int _startTime = 0;
   int _elapsedTime = 0;
   bool _isTyping = false;
+  bool _isFinished = false;
   Timer? _timer;
   int _correctChars = 0;
   int _totalChars = 0;
@@ -56,13 +57,27 @@ class _TypingTestPageState extends State<TypingTestPage> {
   }
 
   void _onTextChanged() {
-    if (!_isTyping && _textController.text.isNotEmpty) {
-      _startTest();
+    if (!_isFinished && _isTyping) {
+      setState(() {
+        _typedText = _textController.text;
+        _calculateAccuracy();
+        _checkAutoFinish();
+      });
     }
+  }
+
+  void _checkAutoFinish() {
+    if (_typedText.trim() == _targetText.trim() && _isTyping) {
+      _finishTest();
+    }
+  }
+
+  void _finishTest() {
     setState(() {
-      _typedText = _textController.text;
-      _calculateAccuracy();
+      _isFinished = true;
+      _isTyping = false;
     });
+    _timer?.cancel();
   }
 
   void _calculateAccuracy() {
@@ -218,14 +233,35 @@ class _TypingTestPageState extends State<TypingTestPage> {
               const SizedBox(height: 24),
               TextField(
                 controller: _textController,
+                autofocus: true,
+                enabled: _isTyping && !_isFinished,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Start typing...',
+                  hintText: _isTyping 
+                      ? 'Start typing...' 
+                      : 'Click "Start Test" to begin',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.all(16.0),
                 ),
+                style: const TextStyle(fontSize: 18),
               ),
+              const SizedBox(height: 24),
+              if (!_isTyping && !_isFinished)
+                ElevatedButton.icon(
+                  onPressed: _startTest,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Start Test'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
