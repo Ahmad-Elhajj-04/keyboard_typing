@@ -120,6 +120,41 @@ class _TypingTestPageState extends State<TypingTestPage> {
     return (_wordsTyped / minutes);
   }
 
+  List<TextSpan> _buildTextSpans() {
+    List<TextSpan> spans = [];
+
+    for (int i = 0; i < _targetText.length; i++) {
+      Color color;
+      Color? backgroundColor;
+
+      if (i < _typedText.length) {
+        if (_typedText[i] == _targetText[i]) {
+          color = Colors.green;
+        } else {
+          color = Colors.red;
+          backgroundColor = Colors.red.withOpacity(0.2);
+        }
+      } else if (i == _typedText.length) {
+        color = Colors.blue;
+        backgroundColor = Colors.blue.withOpacity(0.1);
+      } else {
+        color = Colors.grey;
+      }
+
+      spans.add(TextSpan(
+        text: _targetText[i],
+        style: TextStyle(
+          color: color,
+          backgroundColor: backgroundColor,
+          fontSize: 20,
+          fontWeight: i == _typedText.length ? FontWeight.bold : FontWeight.normal,
+        ),
+      ));
+    }
+
+    return spans;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,16 +166,22 @@ class _TypingTestPageState extends State<TypingTestPage> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: Text(
-                _targetText,
-                style: const TextStyle(fontSize: 20),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: RichText(
+                    text: TextSpan(
+                      children: _buildTextSpans(),
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 24),
