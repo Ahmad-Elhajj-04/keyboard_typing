@@ -162,40 +162,72 @@ class _TypingTestPageState extends State<TypingTestPage> {
         title: const Text('Typing Speed Test'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(20.0),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_isTyping)
+                Container(
+                  padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[300]!),
                   ),
-                  child: RichText(
-                    text: TextSpan(
-                      children: _buildTextSpans(),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _StatItem(
+                        label: 'WPM',
+                        value: _wpm.toStringAsFixed(0),
+                        icon: Icons.speed,
+                      ),
+                      _StatItem(
+                        label: 'Accuracy',
+                        value: '${_accuracy.toStringAsFixed(1)}%',
+                        icon: Icons.check_circle,
+                      ),
+                      _StatItem(
+                        label: 'Time',
+                        value: _formatTime(_elapsedTime),
+                        icon: Icons.timer,
+                      ),
+                    ],
+                  ),
+                ),
+              if (_isTyping) const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    padding: const EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[300]!),
                     ),
-                    textAlign: TextAlign.left,
+                    child: RichText(
+                      text: TextSpan(
+                        children: _buildTextSpans(),
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _textController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: 'Start typing...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _textController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Start typing...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
