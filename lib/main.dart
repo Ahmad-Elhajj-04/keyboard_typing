@@ -84,6 +84,24 @@ class _TypingTestPageState extends State<TypingTestPage> {
     _timer?.cancel();
   }
 
+  void _resetTest() {
+    setState(() {
+      _textController.clear();
+      _typedText = "";
+      _isTyping = false;
+      _isFinished = false;
+      _elapsedTime = 0;
+      _countdown = 0;
+      _isCountdownActive = false;
+      _correctChars = 0;
+      _totalChars = 0;
+      _errors = 0;
+    });
+    _timer?.cancel();
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+  }
+
   void _calculateAccuracy() {
     _totalChars = _typedText.length;
     _correctChars = 0;
@@ -157,6 +175,10 @@ class _TypingTestPageState extends State<TypingTestPage> {
     return _typedText.trim().split(RegExp(r'\s+')).length;
   }
 
+  int get _targetWords {
+    return _targetText.trim().split(RegExp(r'\s+')).length;
+  }
+
   double get _wpm {
     if (_elapsedTime == 0) return 0.0;
     double minutes = _elapsedTime / 60000.0;
@@ -204,6 +226,7 @@ class _TypingTestPageState extends State<TypingTestPage> {
       appBar: AppBar(
         title: const Text('Typing Speed Test'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Padding(
@@ -237,7 +260,7 @@ class _TypingTestPageState extends State<TypingTestPage> {
                     ),
                   ),
                 ),
-              if (!_isCountdownActive && _isTyping)
+              if (!_isCountdownActive && (_isTyping || _isFinished))
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
@@ -265,58 +288,163 @@ class _TypingTestPageState extends State<TypingTestPage> {
                     ],
                   ),
                 ),
-              if (!_isCountdownActive && _isTyping) const SizedBox(height: 16),
+              if (!_isCountdownActive && (_isTyping || _isFinished)) const SizedBox(height: 16),
+              if (!_isCountdownActive && (_isTyping || _isFinished))
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Words: ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      Text(
+                        '$_wordsTyped / $_targetWords',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (!_isCountdownActive && (_isTyping || _isFinished)) const SizedBox(height: 24),
               if (!_isCountdownActive)
                 Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    padding: const EdgeInsets.all(20.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: RichText(
-                      text: TextSpan(
-                        children: _buildTextSpans(),
+                  child: SingleChildScrollView(
+                    child: Container(
+                      padding: const EdgeInsets.all(20.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[300]!),
                       ),
-                      textAlign: TextAlign.left,
+                      child: RichText(
+                        text: TextSpan(
+                          children: _buildTextSpans(),
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
                     ),
                   ),
                 ),
-              ),
               if (!_isCountdownActive) const SizedBox(height: 24),
-              if (!_isCountdownActive)
+              if (!_isCountdownActive && !_isFinished)
                 TextField(
                   controller: _textController,
                   autofocus: true,
                   enabled: _isTyping && !_isFinished,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: _isTyping 
-                      ? 'Start typing...' 
-                      : 'Click "Start Test" to begin',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.all(16.0),
-                ),
-                  style: const TextStyle(fontSize: 18),
-                ),
-              if (!_isCountdownActive) const SizedBox(height: 24),
-              if (!_isCountdownActive && !_isTyping && !_isFinished)
-                ElevatedButton.icon(
-                  onPressed: _startCountdown,
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Start Test'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: _isTyping 
+                        ? 'Start typing...' 
+                        : 'Click "Start Test" to begin',
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.all(16.0),
                   ),
+                  style: const TextStyle(fontSize: 18),
+                ),
+              if (!_isCountdownActive && _isFinished)
+                const SizedBox(height: 24),
+              if (!_isCountdownActive && _isFinished)
+                Container(
+                  padding: const EdgeInsets.all(20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.green[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.green[300]!),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green[700],
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Test Complete!',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[700],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'You typed ${_wordsTyped} words in ${_formatTime(_elapsedTime)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (!_isCountdownActive) const SizedBox(height: 24),
+              if (!_isCountdownActive)
+                Row(
+                  children: [
+                    if (!_isTyping && !_isFinished)
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _startCountdown,
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Start Test'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (_isTyping && !_isFinished)
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _finishTest,
+                          icon: const Icon(Icons.stop),
+                          label: const Text('Finish Test'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (_isFinished)
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _resetTest,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Try Again'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
             ],
           ),
