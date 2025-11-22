@@ -31,11 +31,25 @@ class TypingTestPage extends StatefulWidget {
 class _TypingTestPageState extends State<TypingTestPage> {
   final TextEditingController _textController = TextEditingController();
   final String _targetText = "The quick brown fox jumps over the lazy dog";
+  String _typedText = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _textController.addListener(_onTextChanged);
+  }
 
   @override
   void dispose() {
+    _textController.removeListener(_onTextChanged);
     _textController.dispose();
     super.dispose();
+  }
+
+  void _onTextChanged() {
+    setState(() {
+      _typedText = _textController.text;
+    });
   }
 
   @override
