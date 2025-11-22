@@ -38,6 +38,9 @@ class _TypingTestPageState extends State<TypingTestPage> {
   bool _isTyping = false;
   bool _isFinished = false;
   Timer? _timer;
+  Timer? _countdownTimer;
+  int _countdown = 0;
+  bool _isCountdownActive = false;
   int _correctChars = 0;
   int _totalChars = 0;
   int _errors = 0;
@@ -53,11 +56,12 @@ class _TypingTestPageState extends State<TypingTestPage> {
     _textController.removeListener(_onTextChanged);
     _textController.dispose();
     _timer?.cancel();
+    _countdownTimer?.cancel();
     super.dispose();
   }
 
   void _onTextChanged() {
-    if (!_isFinished && _isTyping) {
+    if (!_isCountdownActive && !_isFinished && _isTyping) {
       setState(() {
         _typedText = _textController.text;
         _calculateAccuracy();
@@ -103,6 +107,26 @@ class _TypingTestPageState extends State<TypingTestPage> {
     return (_correctChars / _totalChars) * 100;
   }
 
+  void _startCountdown() {
+    setState(() {
+      _isCountdownActive = true;
+      _countdown = 3;
+    });
+
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _countdown--;
+        if (_countdown <= 0) {
+          timer.cancel();
+          _countdownTimer = null;
+          _isCountdownActive = false;
+          _startTest();
+        }
+      });
+    });
+  }
+
   void _startTest() {
     setState(() {
       _isTyping = true;
@@ -111,9 +135,13 @@ class _TypingTestPageState extends State<TypingTestPage> {
     });
 
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      setState(() {
-        _elapsedTime = DateTime.now().millisecondsSinceEpoch - _startTime;
-      });
+      if (!_isFinished) {
+        setState(() {
+          _elapsedTime = DateTime.now().millisecondsSinceEpoch - _startTime;
+        });
+      } else {
+        timer.cancel();
+      }
     });
   }
 
@@ -183,7 +211,33 @@ class _TypingTestPageState extends State<TypingTestPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (_isTyping)
+              if (_isCountdownActive)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$_countdown',
+                          style: TextStyle(
+                            fontSize: 120,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Get ready!',
+                          style: TextStyle(
+                            fontSize: 24,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (!_isCountdownActive && _isTyping)
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
@@ -211,8 +265,9 @@ class _TypingTestPageState extends State<TypingTestPage> {
                     ],
                   ),
                 ),
-              if (_isTyping) const SizedBox(height: 16),
-              Expanded(
+              if (!_isCountdownActive && _isTyping) const SizedBox(height: 16),
+              if (!_isCountdownActive)
+                Expanded(
                 child: SingleChildScrollView(
                   child: Container(
                     padding: const EdgeInsets.all(20.0),
@@ -230,11 +285,12 @@ class _TypingTestPageState extends State<TypingTestPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _textController,
-                autofocus: true,
-                enabled: _isTyping && !_isFinished,
+              if (!_isCountdownActive) const SizedBox(height: 24),
+              if (!_isCountdownActive)
+                TextField(
+                  controller: _textController,
+                  autofocus: true,
+                  enabled: _isTyping && !_isFinished,
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: _isTyping 
@@ -247,12 +303,12 @@ class _TypingTestPageState extends State<TypingTestPage> {
                   fillColor: Colors.white,
                   contentPadding: const EdgeInsets.all(16.0),
                 ),
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 24),
-              if (!_isTyping && !_isFinished)
+                  style: const TextStyle(fontSize: 18),
+                ),
+              if (!_isCountdownActive) const SizedBox(height: 24),
+              if (!_isCountdownActive && !_isTyping && !_isFinished)
                 ElevatedButton.icon(
-                  onPressed: _startTest,
+                  onPressed: _startCountdown,
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('Start Test'),
                   style: ElevatedButton.styleFrom(
