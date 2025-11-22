@@ -84,6 +84,24 @@ class _TypingTestPageState extends State<TypingTestPage> {
     _timer?.cancel();
   }
 
+  void _resetTest() {
+    setState(() {
+      _textController.clear();
+      _typedText = "";
+      _isTyping = false;
+      _isFinished = false;
+      _elapsedTime = 0;
+      _countdown = 0;
+      _isCountdownActive = false;
+      _correctChars = 0;
+      _totalChars = 0;
+      _errors = 0;
+    });
+    _timer?.cancel();
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+  }
+
   void _calculateAccuracy() {
     _totalChars = _typedText.length;
     _correctChars = 0;
@@ -237,7 +255,7 @@ class _TypingTestPageState extends State<TypingTestPage> {
                     ),
                   ),
                 ),
-              if (!_isCountdownActive && _isTyping)
+              if (!_isCountdownActive && (_isTyping || _isFinished))
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
@@ -265,7 +283,7 @@ class _TypingTestPageState extends State<TypingTestPage> {
                     ],
                   ),
                 ),
-              if (!_isCountdownActive && _isTyping) const SizedBox(height: 16),
+              if (!_isCountdownActive && (_isTyping || _isFinished)) const SizedBox(height: 16),
               if (!_isCountdownActive)
                 Expanded(
                 child: SingleChildScrollView(
@@ -306,17 +324,56 @@ class _TypingTestPageState extends State<TypingTestPage> {
                   style: const TextStyle(fontSize: 18),
                 ),
               if (!_isCountdownActive) const SizedBox(height: 24),
-              if (!_isCountdownActive && !_isTyping && !_isFinished)
-                ElevatedButton.icon(
-                  onPressed: _startCountdown,
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Start Test'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+              if (!_isCountdownActive)
+                Row(
+                  children: [
+                    if (!_isTyping && !_isFinished)
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _startCountdown,
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Start Test'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (_isTyping && !_isFinished)
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _finishTest,
+                          icon: const Icon(Icons.stop),
+                          label: const Text('Finish Test'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (_isFinished)
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _resetTest,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Try Again'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
             ],
           ),
