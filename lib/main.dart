@@ -29,6 +29,15 @@ class TypingTestPage extends StatefulWidget {
 }
 
 class _TypingTestPageState extends State<TypingTestPage> {
+  final TextEditingController _textController = TextEditingController();
+  final String _targetText = "The quick brown fox jumps over the lazy dog";
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,8 +45,35 @@ class _TypingTestPageState extends State<TypingTestPage> {
         title: const Text('Typing Speed Test'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: const Center(
-        child: Text('Typing test will go here'),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Text(
+                _targetText,
+                style: const TextStyle(fontSize: 20),
+              ),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: _textController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Start typing...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
