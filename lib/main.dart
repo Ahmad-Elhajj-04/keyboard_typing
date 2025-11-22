@@ -82,6 +82,17 @@ class _TypingTestPageState extends State<TypingTestPage> {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
+  int get _wordsTyped {
+    if (_typedText.trim().isEmpty) return 0;
+    return _typedText.trim().split(RegExp(r'\s+')).length;
+  }
+
+  double get _wpm {
+    if (_elapsedTime == 0) return 0.0;
+    double minutes = _elapsedTime / 60000.0;
+    return (_wordsTyped / minutes);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
