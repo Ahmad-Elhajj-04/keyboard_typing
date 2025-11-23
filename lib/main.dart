@@ -6,8 +6,24 @@ void main() {
   runApp(const TypingSpeedTestApp());
 }
 
-class TypingSpeedTestApp extends StatelessWidget {
+class TypingSpeedTestApp extends StatefulWidget {
   const TypingSpeedTestApp({super.key});
+  @override
+  State<TypingSpeedTestApp> createState() => _TypingSpeedTestAppState();
+}
+
+class _TypingSpeedTestAppState extends State<TypingSpeedTestApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void _toggleTheme() {
+    setState(() {
+      if (_themeMode == ThemeMode.light) {
+        _themeMode = ThemeMode.dark;
+      } else {
+        _themeMode = ThemeMode.light;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +31,19 @@ class TypingSpeedTestApp extends StatelessWidget {
       title: 'Typing Speed Test',
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
+        colorSchemeSeed: Colors.indigo,
+        brightness: Brightness.light,
       ),
-      home: const TypingTestPage(),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.indigo,
+        brightness: Brightness.dark,
+      ),
+      themeMode: _themeMode, // Uses the current mode.
+      home: TypingTestPage(
+        onToggleTheme: _toggleTheme,
+        isDarkMode: _themeMode == ThemeMode.dark,
+      ),
     );
   }
 }
@@ -25,7 +51,13 @@ class TypingSpeedTestApp extends StatelessWidget {
 enum Difficulty { easy, medium, hard }
 
 class TypingTestPage extends StatefulWidget {
-  const TypingTestPage({super.key});
+  final VoidCallback onToggleTheme;
+  final bool isDarkMode;
+  const TypingTestPage({
+    super.key,
+    required this.onToggleTheme,
+    required this.isDarkMode,
+  });
 
   @override
   _TypingTestPageState createState() => _TypingTestPageState();
@@ -34,6 +66,7 @@ class TypingTestPage extends StatefulWidget {
 class _TypingTestPageState extends State<TypingTestPage> {
   final Map<Difficulty, List<String>> _sentences = {
     Difficulty.easy: [
+      "The quick brown fox jumps over the lazy dog",
       "Flutter makes beautiful apps for mobile",
       "Typing fast is fun and useful",
       "Practice daily to improve your speed",
@@ -50,21 +83,21 @@ class _TypingTestPageState extends State<TypingTestPage> {
       "A gentle breeze cools the warm summer air",
     ],
     Difficulty.medium: [
-          "Typing tests improve speed and accuracy with practice regularly",
-          "Developers often use Flutter for cross platform apps",
-          "Longer sentences help in building muscle memory",
-          "Accuracy is as important as building speed",
-          "Consistent practice leads to noticeable improvements",
-          "Improving typing speed requires consistent daily practice and focus",
-          "Technology advances rapidly, changing how we communicate and work",
-          "Learning new skills can open doors to many exciting opportunities",
-          "Creative thinking helps solve complex problems effectively and efficiently",
-          "Balancing work and rest is essential for maintaining productivity",
-          "Time management plays a crucial role in achieving your goals",
-          "Reading challenging texts builds vocabulary and comprehension skills",
-          "Maintaining good posture prevents fatigue during long typing sessions",
-          "Asking for feedback can provide valuable insights to improve",
-          "Teamwork involves communication, collaboration, and mutual respect",
+      "Typing tests improve speed and accuracy with practice regularly",
+      "Developers often use Flutter for cross platform apps",
+      "Longer sentences help in building muscle memory",
+      "Accuracy is as important as building speed",
+      "Consistent practice leads to noticeable improvements",
+      "Improving typing speed requires consistent daily practice and focus",
+      "Technology advances rapidly, changing how we communicate and work",
+      "Learning new skills can open doors to many exciting opportunities",
+      "Creative thinking helps solve complex problems effectively and efficiently",
+      "Balancing work and rest is essential for maintaining productivity",
+      "Time management plays a crucial role in achieving your goals",
+      "Reading challenging texts builds vocabulary and comprehension skills",
+      "Maintaining good posture prevents fatigue during long typing sessions",
+      "Asking for feedback can provide valuable insights to improve",
+      "Teamwork involves communication, collaboration, and mutual respect",
     ],
     Difficulty.hard: [
       "Unmanageable, problematical, troublesome, perplexing, and formidable challenges await skilled typists",
@@ -72,6 +105,11 @@ class _TypingTestPageState extends State<TypingTestPage> {
       "Technical jargon and complex sentences push your limits",
       "Rapid shifts in case and punctuation test attention and skill",
       "Sustained focus is essential for peak typing performance",
+      "Seemingly insignificant errors can dramatically affect one's overall accuracy score",
+      "A comprehensive understanding of keyboard layouts facilitates efficiency",
+      "Peripheral vision and ergonomic hand placement minimize fatigue and maximize results",
+      "Ambidextrous typists effortlessly alternate between keys for enhanced performance",
+      "Analytical skills are honed through persistent, mindful engagement in challenging content",
     ],
   };
 
@@ -254,7 +292,13 @@ class _TypingTestPageState extends State<TypingTestPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Typing Speed Test'),
-        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            tooltip: widget.isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode",
+            onPressed: widget.onToggleTheme,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -295,10 +339,9 @@ class _TypingTestPageState extends State<TypingTestPage> {
                 onPressed: _isRunning ? _stopTest : _startTest,
                 child: Text(_isRunning ? 'Finish Test' : 'Start Test'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
+                  backgroundColor: Colors.indigo,
                   minimumSize: const Size(150, 50),
                   textStyle: const TextStyle(fontSize: 18),
-                  foregroundColor: Colors.white,
                 ),
               ),
             ),
