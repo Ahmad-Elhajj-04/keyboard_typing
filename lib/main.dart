@@ -121,8 +121,13 @@ class _TypingTestPageState extends State<TypingTestPage> {
   Timer? _timer;
   bool _isRunning = false;
 
+  // Stats for the current sentence being typed
   int _correctChars = 0;
   int _totalTyped = 0;
+
+  // Stats for previously completed sentences in this session
+  int _sessionCorrect = 0;
+  int _sessionTyped = 0;
 
   final Random _random = Random();
 
@@ -143,11 +148,13 @@ class _TypingTestPageState extends State<TypingTestPage> {
   }
 
   void _startTest() {
+    // Reset session stats
+    _sessionCorrect = 0;
+    _sessionTyped = 0;
+
     _loadNewSentence();
     setState(() {
       _timerSeconds = 60;
-      _correctChars = 0;
-      _totalTyped = 0;
       _isRunning = true;
     });
 
@@ -185,21 +192,28 @@ class _TypingTestPageState extends State<TypingTestPage> {
       _correctChars = correct;
 
       if (value == _testText) {
-        _stopTest();
+        // Sentence completed successfully: Add to session stats and load new one
+        _sessionCorrect += _testText.length;
+        _sessionTyped += _testText.length;
+        _loadNewSentence();
       }
     });
   }
 
   double get _accuracy {
-    if (_totalTyped == 0) return 0;
-    return (_correctChars / _totalTyped) * 100;
+    int total = _sessionTyped + _totalTyped;
+    int correct = _sessionCorrect + _correctChars;
+    if (total == 0) return 0;
+    return (correct / total) * 100;
   }
 
   double get _wpm {
     if (!_isRunning && _timerSeconds == 60) return 0;
     final int elapsed = 60 - _timerSeconds;
     if (elapsed == 0) return 0;
-    final words = _correctChars / 5;
+
+    int correct = _sessionCorrect + _correctChars;
+    final words = correct / 5;
     return words / (elapsed / 60);
   }
 
@@ -289,6 +303,8 @@ class _TypingTestPageState extends State<TypingTestPage> {
 
   @override
   Widget build(BuildContext context) {
+    int total = _sessionTyped + _totalTyped;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Typing Speed Test'),
@@ -314,7 +330,7 @@ class _TypingTestPageState extends State<TypingTestPage> {
               enabled: _isRunning,
               autofocus: _isRunning,
               decoration: InputDecoration(
-                border: OutlineInputBorder(
+                border: const OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.indigo, width: 2)),
                 hintText: 'Start typing here...',
                 focusedBorder: OutlineInputBorder(
@@ -342,10 +358,11 @@ class _TypingTestPageState extends State<TypingTestPage> {
                   backgroundColor: Colors.indigo,
                   minimumSize: const Size(150, 50),
                   textStyle: const TextStyle(fontSize: 18),
+                  foregroundColor: Colors.white,
                 ),
               ),
             ),
-            if (!_isRunning && _totalTyped > 0)
+            if (!_isRunning && total > 0)
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: Center(
