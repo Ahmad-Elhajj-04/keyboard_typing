@@ -45,7 +45,6 @@ Typing Speed Test is a professional-grade Flutter application designed to help u
 - **Color-Coded Feedback**:
   - 🟢 Green for correct characters
   - 🔴 Red for incorrect characters (with background highlight)
-  - 🔵 Blue highlight for the next character to type
   - ⚪ Grey for untyped characters
 - **Real-time Statistics Display** - Live updates of WPM, Accuracy, and Time
 - **Word Progress Indicator** - Shows typed words vs. target words
@@ -65,8 +64,7 @@ Typing Speed Test is a professional-grade Flutter application designed to help u
 1. Launch the application
 2. Review the target text displayed at the top
 3. Click the **"Start Test"** button
-4. Wait for the 3-2-1 countdown
-5. Begin typing the target text as accurately as possible
+4. Begin typing the target text as accurately as possible
 
 ### During the Test
 
@@ -206,4 +204,5 @@ Contributions are welcome! If you'd like to contribute to this project:
 Made with ❤️ using Flutter
 
 </div>
+
 
